@@ -107,11 +107,19 @@ Espero que você curta a experiencia da nossa solução financeira
 #Widget de upload de arquivo
 file_upload = st.file_uploader("Faça o upload dos dados aqui", type=["csv"])
 
-#Verifica se algum arquivo foi enviado
-if file_upload:
-
-    # Leitura dos dados
+# Usar arquivo padrão se nenhum for enviado
+if file_upload is None:
+    try:
+        df = pd.read_csv("dados_exemplo.csv")
+        st.info("📊 Usando dados de exemplo. Faça upload do seu arquivo para usar seus dados.")
+    except FileNotFoundError:
+        st.error("Arquivo de exemplo não encontrado. Por favor, faça upload de um arquivo CSV.")
+        df = None
+else:
     df = pd.read_csv(file_upload)
+
+#Verifica se há dados para processar
+if df is not None:
     df['Data'] = pd.to_datetime(df['Data'], format='%d/%m/%Y').dt.date
 
     #Exibição dos dados
