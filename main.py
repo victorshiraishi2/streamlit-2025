@@ -92,7 +92,7 @@ def main_metas():
             patrimonio_final = meta_estipulada + valor_inicio
             st.markdown(f"Patrimonio Estimado por meta \n\n R$ {patrimonio_final:.2f}")
 
-    return data_inicio_meta, meta_estipulada, patrimonio_final
+    return data_inicio_meta, valor_inicio, meta_estipulada, patrimonio_final
 
 st.set_page_config(page_title='Finanças', page_icon=':moneybag:')
 
@@ -200,24 +200,24 @@ if df is not None:
         tab_main,tab_data_meta, tab_graph = st.tabs(tabs=["Configuração", "Dados", "Gráficos"])
         
         with tab_main:
-            data_inicio_meta, meta_estipulada, patrimonio_final = main_metas()
+            data_inicio_meta, valor_inicio, meta_estipulada, patrimonio_final = main_metas()
 
         with tab_data_meta:
             meses = pd.DataFrame({
-                "Data Referência" : [data_inicio_meta + pd.DateOffset(months=i) for i in range(1, 13)],
-                "Meta Mensal": [round(meta_estipulada,2) * i for i in range(1, 13)],
+                "Data Referência": [(data_inicio_meta + pd.DateOffset(months=i)) for i in range(1, 13)],
+                "Meta Mensal": [valor_inicio + round(meta_estipulada/12, 2) * i for i in range(1, 13)],
                 })
-            
-            meses["Data Referência"] = meses["Data Referência"].dt.strftime('%Y-%m')
-            df_patrimonio = df_stats.reset_index()[["Data", "Valor"]]
-            df_patrimonio["Data Referência"] = pd.to_datetime(df_patrimonio["Data"]).dt.strftime('%Y-%m')
-            meses = meses.merge(df_patrimonio,how= "left", on="Data Referência")
 
-            meses = meses[["Data Referência","Meta Mensal", "Valor"]]
+            meses["Data Referência"] = meses["Data Referência"].dt.strftime("%Y-%m")
+            df_patrimonio = df_stats.reset_index()[["Data", "Valor"]]
+            df_patrimonio["Data Referência"] = pd.to_datetime(df_patrimonio["Data"]).dt.strftime("%Y-%m")
+            meses = meses.merge(df_patrimonio, how='left', on="Data Referência")
+
+            meses = meses[['Data Referência', "Meta Mensal", "Valor"]]
             meses["Atingimento (%)"] = meses["Valor"] / meses["Meta Mensal"]
             meses["Atingimento Ano"] = meses["Valor"] / patrimonio_final
             meses["Atingimento Esperado"] = meses["Meta Mensal"] / patrimonio_final
-            meses.set_index("Data Referência")
+            meses = meses.set_index("Data Referência")
 
             columns_config_meses = {
                 "Meta Mensal": st.column_config.NumberColumn("Meta Mensal", format="R$ %.2f"),
