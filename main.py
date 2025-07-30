@@ -86,7 +86,7 @@ def main_metas():
     with st.container(border=True):
         col1_meta, col2_meta = st.columns(2)
         with col1_meta:
-            meta_estipulada = st.number_input("Meta Estipulada", min_value=-99999., format="%.2f", value=mensal)
+            meta_estipulada = st.number_input("Meta Estipulada", min_value=-99999., format="%.2f", value=anual)
 
         with col2_meta:
             patrimonio_final = meta_estipulada + valor_inicio
